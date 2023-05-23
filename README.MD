@@ -2,8 +2,6 @@
 
 The stores operated by Mystique enterprise generate a lot of events related to sales and inventory from multiple locations. In order to efficiently handle this high volume of data and facilitate further processing, Mystique enterprise requires a solution that allows them to ingest the data and store it in a central location.
 
-In addition, Mystique enterprise also requires the ability to selectively process events based on specific properties. For instance, they are interested in filtering events that are classified as `sale_event` or `inventory_event`. This selective processing helps them focus on relevant data for analysis and decision-making. Further to that, Mystique enterprise wants to apply further filtering by only considering events that have a `discount` greater than `20`. This feature is crucial for analyzing business metrics, such as `total_sales` and `total_discounts`, as well as identifying potential fraudulent activity.
-
 A sample of their event is shown below Can you help them?
 
 ```json
@@ -43,13 +41,7 @@ Event properties,
 
 To meet their needs, Mystique enterprise has chosen [Azure Event Hub][1] as the platform of choice. It provides the necessary capabilities to handle the ingestion and storage of the data. We can utilize the [capture streaming events capability][2] of Azure Event Hub to persist the message to Azure Blob Storage. This allows us to store the data in a central location for further processing.
 
-In addition, Azure Event Hub also provides the ability to filter messages based on specific properties. This feature can be leveraged to selectively process events based on specific criteria. For instance, we can filter events that are classified as `sale_event` or `inventory_event`. This allows us to focus on relevant data for analysis and decision-making. Further to that, we can apply further filtering by only considering events that have a `discount` greater than `20`. This feature is crucial for analyzing business metrics, such as `total_sales` and `total_discounts`, as well as identifying potential fraudulent activity.
-
-By utilizing Azure Event Hub and applying these filtering mechanisms, Mystique enterprise will be able to efficiently handle and process their high-volume event data, enabling them to gain valuable insights and make informed business decisions.
-
-In this demonstration, an Azure Function with a managed identity will generate events and send them to event hub within a designated event hub namespace. The hub is configred with `4` subscriptions, We can use the partitions to segregate events based on the `event_type` property. For example, `sale_events` and `inventory_events` can be sent to different partitions. This allows us to process events based on specific criteria. For instance, we can filter events that are classified as `sale_event` or `inventory_event`. This allows us to focus on relevant data for analysis and decision-making. Further to that, we can apply further filtering by only considering events that have a `discount` greater than `20`. This feature is crucial for analyzing business metrics, such as `total_sales` and `total_discounts`, as well as identifying potential fraudulent activity.
-
-The consumer function utilizes a subscription trigger on the `sale_events` topic to consume events from the topic. It then processes and persists these events to an Azure Storage Account and Cosmos DB. To ensure secure and controlled access to the necessary resources, a scoped managed identity with RBAC (Role-Based Access Control) permissions is employed. Additionally, the trigger connection is authenticated using a managed identity.
+In this demonstration, an Azure Function with a managed identity will generate events and send them to event hub within a designated event hub namespace. The hub is configred with `4` partitions, with `2` partitions allocated for each event type. The event hub is also configured to capture streaming events and store them in Azure Blob Storage. The Azure Function will be configured to utilize the managed identity to interact with the event hub and send events to the hub. The events will be stored in the blob storage based on the partition they are sent to.
 
 By leveraging the capabilities of Bicep, all the required resources can be easily provisioned and managed with minimal effort. Bicep simplifies the process of defining and deploying Azure resources, allowing for efficient resource management.
 
@@ -188,7 +180,7 @@ Thank you for your interest in contributing to our project. Whether it is a bug 
 
 1. [Azure Docs - Event Hub][1]
 1. [Azure Docs - Event Hub - Streaming Event Capture][2]
-1. [Azure Docs - Event Hub Python Samples][2]
+1. [Azure Docs - Event Hub Python Samples][3]
 1. [Azure Docs - Managed Identity][8]
 1. [Azure Docs - Managed Identity Caching][9]
 1. [Gitub Issue - Default Credential Troubleshooting][10]
