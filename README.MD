@@ -52,7 +52,7 @@ The consumer function utilizes a subscription trigger on the `sale_events` topic
 
 By leveraging the capabilities of Bicep, all the required resources can be easily provisioned and managed with minimal effort. Bicep simplifies the process of defining and deploying Azure resources, allowing for efficient resource management.
 
-![Miztiik Automation - Event Streaming with Azure Event Hub](images/miztiik_architecture_event_streaming with_azure_event_hub_to_blob_001.png)
+![Miztiik Automation - Event Streaming with Azure Event Hub](images/miztiik_architecture_event_streaming%20with_azure_event_hub_to_blob_001.png)
 
 1. ## 🧰 Prerequisites
 
@@ -65,16 +65,16 @@ By leveraging the capabilities of Bicep, all the required resources can be easil
    - `jq` - [Get help here](https://stedolan.github.io/jq/download/)
    - `bash` or git bash - [Get help here](https://git-scm.com/downloads)
 
-2. ## ⚙️ Setting up the environment
+1. ## ⚙️ Setting up the environment
 
    - Get the application code
 
      ```bash
-     git clone https://github.com/miztiik/azure-svc-bus-msg-consumer-with-filter.git
-     cd azure-svc-bus-msg-consumer-with-filter
+     git clone https://github.com/miztiik/azure-event-hub-streams.git
+     cd azure-event-hub-streams
      ```
 
-3. ## 🚀 Prepare the local environment
+1. ## 🚀 Prepare the local environment
 
    Ensure you have jq, Azure Cli and bicep working
 
@@ -86,26 +86,26 @@ By leveraging the capabilities of Bicep, all the required resources can be easil
    az account show
     ```
 
-4. ## 🚀 Deploying the Solution
+1. ## 🚀 Deploying the Solution
 
    - **Stack: Main Bicep**
-     We will create the following resoureces
+     We will create the following resources
      - **Storage Accounts** for storing the events
        - General purpose Storage Account - Used by Azure functions to store the function code
        - `warehouse*` -  Azure Function will store the events here
-     - **Servie Bus Namespace**
-       - Service Bus Topic, with following subscriptions
-         - `All Events`
-         - `Inventory_Events`
-         - `Sale_Events`
-         - `Fraud_Events`
+     - **Event Hub Namespace**
+       - Event Hub Stream, with `4` Partitions
+         - Even Partitions - `0` & `2` - `inventory_Event`
+         - Odd Partitions - `1` & `3` - `sale_event`
+         - Event Hub Capture - Enabled
+           - Events will be stored in `warehouse*` storage account.
      - **Managed Identity**
         - This will be used by the Azure Function to interact with the service bus
      - **Python Azure Function**
         - **Producer**: `HTTP` Trigger. Customized to send `count` number of events to the service bus, using parameters passed in the query string. `count` defaults to `10`
-        - **Consumer**: `Service Bus Topic Subscription` Trigger. The trigger uses managed identity to authenticate to the service bus.
-     - **Cosmos DB**
-        - This will be used by the Azure Function to store the events
+     - _Note: There are few additional resources created, but you can ignore them for now, they aren't required for this demo, but be sure to clean them up later_
+
+      Initiate the deployment with the following command,
 
       ```bash
       # make deploy
@@ -114,49 +114,49 @@ By leveraging the capabilities of Bicep, all the required resources can be easil
 
       After successfully deploying the stack, Check the `Resource Groups/Deployments` section for the resources.
 
-5. ## 🔬 Testing the solution
+1. ## 🔬 Testing the solution
 
    - **Trigger the function**
 
       ```bash
-      FUNC_URL="https://svc-bus-msg-filter-store-backend-fn-app-004.azurewebsites.net/api/store-events-producer-fn"
+      FUNC_URL="https://event-hub-streams-store-backend-fn-app-003.azurewebsites.net/api/store-events-producer-fn"
       curl ${FUNC_URL}?count=10
       ```
 
       You should see an output like this,
 
       ```json
-         {
-         "miztiik_event_processed": true,
-         "msg": "Generated 10 messages",
-         "resp": {
-            "status": true,
-            "tot_msgs": 10,
-            "bad_msgs": 2,
-            "sale_evnts": 8,
-            "inventory_evnts": 2,
-            "tot_sales": 507.57
-         },
-         "count": 10,
-         "last_processed_on": "2023-05-21T14:03:45.505416"
-         }
-
+      {
+      "miztiik_event_processed": true,
+      "msg": "Generated 10 messages",
+      "resp": {
+         "status": true,
+         "tot_msgs": 10,
+         "bad_msgs": 1,
+         "sale_evnts": 4,
+         "inventory_evnts": 6,
+         "tot_sales": 507.03000000000003
+      },
+      "count": 10,
+      "last_processed_on": "2023-05-23T08:33:36.642732"
+      }
       ```
 
-      Our function has produced `10` messages with `8` of them were `sale_events` and `2` of them were `inventory_events`. We can find the same being processed by sale_events and inventory_events subscriptions. Likewise, we see `8` records blob and cosmos.
+      This run of function has produced `10` messages with `4` of them were `sale_events` and `6` of them were `inventory_events`. _I have ran the producer function multiple times, so the numbers may vary for you_. You can also see the that `inventory_event` is stored in blob prefix of either `0` or `2` and `sale_event` is stored in blob prefix of either `1` or `3`. This is because we have configured the event hub to use `4` partitions and we have configured the event hub to use `2` partitions for each event type.
 
+      ![Miztiik Automation - Event Streaming with Azure Event Hub](images/miztiik_architecture_event_streaming%20with_azure_event_hub_to_blob_002.png)
+      ![Miztiik Automation - Event Streaming with Azure Event Hub](images/miztiik_architecture_event_streaming%20with_azure_event_hub_to_blob_003.png)
+      ![Miztiik Automation - Event Streaming with Azure Event Hub](images/miztiik_architecture_event_streaming%20with_azure_event_hub_to_blob_004.png)
 
-      ![Miztiik Automation - Event Streaming with Azure Event Hub](images/miztiik_architecture_event_streaming with_azure_event_hub_to_blob_002)
+1. ## 📒 Conclusion
 
-6. ## 📒 Conclusion
-
-   In this demonstration, we have showcased the utilization of Azure Functions to send messages to Azure Service Bus and leverage message filters to perform actions on specific messages. This approach allows for efficient message processing and enables targeted handling based on specific criteria.
+   In this demonstration, we have showcased how a event producer can stream events Azure Event Hub, capture and store the events in Blob Storage. This approach allows for efficient event processing and enables targeted handling based on specific criteria for downstream processing.
   
-7. ## 🧹 CleanUp
+1. ## 🧹 CleanUp
 
    If you want to destroy all the resources created by the stack, Execute the below command to delete the stack, or _you can delete the stack from console as well_
 
-   - Resources created during [Deploying The Application](#-deploying-the-application)
+   - Resources created during [Deploying The Solution](#-deploying-the-solution)
    - _Any other custom resources, you have created for this demo_
 
    ```bash
@@ -184,7 +184,7 @@ Thank you for your interest in contributing to our project. Whether it is a bug 
 
 1. [Azure Docs - Event Hub][1]
 1. [Azure Docs - Event Hub - Streaming Event Capture][2]
-1. [Azure Docs - Service Bus Topic Filter Limitations][2]
+1. [Azure Docs - Event Hub Python Samples][2]
 1. [Azure Docs - Managed Identity][8]
 1. [Azure Docs - Managed Identity Caching][9]
 1. [Gitub Issue - Default Credential Troubleshooting][10]
@@ -192,6 +192,7 @@ Thank you for your interest in contributing to our project. Whether it is a bug 
 
 [1]: https://learn.microsoft.com/en-us/azure/event-hubs
 [2]: https://learn.microsoft.com/en-us/azure/event-hubs/event-hubs-capture-overview
+[3]: https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/eventhub/azure-eventhub/samples
 [8]: https://learn.microsoft.com/en-us/azure/active-directory/managed-identities-azure-resources/overview
 [9]: https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity?tabs=portal%2Chttp#configure-target-resource
 [10]: https://github.com/microsoft/azure-container-apps/issues/442
