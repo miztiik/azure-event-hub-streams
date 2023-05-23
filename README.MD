@@ -1,6 +1,8 @@
 # Event Streaming with Azure Event Hub
 
-The stores operated by Mystique enterprise generate a lot of events related to sales and inventory from multiple locations. In order to efficiently handle this high volume of data and facilitate further processing, Mystique enterprise requires a solution that allows them to ingest the data and store it in a central location. In addition, Mystique enterprise also requires the ability to selectively process events based on specific properties. For instance, they are interested in filtering events that are classified as `sale_event` or `inventory_event`. This selective processing helps them focus on relevant data for analysis and decision-making. Further to that, Mystique enterprise wants to apply further filtering by only considering events that have a `discount` greater than `20`. This feature is crucial for analyzing business metrics, such as `total_sales` and `total_discounts`, as well as identifying potential fraudulent activity.
+The stores operated by Mystique enterprise generate a lot of events related to sales and inventory from multiple locations. In order to efficiently handle this high volume of data and facilitate further processing, Mystique enterprise requires a solution that allows them to ingest the data and store it in a central location.
+
+In addition, Mystique enterprise also requires the ability to selectively process events based on specific properties. For instance, they are interested in filtering events that are classified as `sale_event` or `inventory_event`. This selective processing helps them focus on relevant data for analysis and decision-making. Further to that, Mystique enterprise wants to apply further filtering by only considering events that have a `discount` greater than `20`. This feature is crucial for analyzing business metrics, such as `total_sales` and `total_discounts`, as well as identifying potential fraudulent activity.
 
 A sample of their event is shown below Can you help them?
 
@@ -47,7 +49,6 @@ By utilizing Azure Event Hub and applying these filtering mechanisms, Mystique e
 
 In this demonstration, an Azure Function with a managed identity will generate events and send them to event hub within a designated event hub namespace. The hub is configred with `4` subscriptions, We can use the partitions to segregate events based on the `event_type` property. For example, `sale_events` and `inventory_events` can be sent to different partitions. This allows us to process events based on specific criteria. For instance, we can filter events that are classified as `sale_event` or `inventory_event`. This allows us to focus on relevant data for analysis and decision-making. Further to that, we can apply further filtering by only considering events that have a `discount` greater than `20`. This feature is crucial for analyzing business metrics, such as `total_sales` and `total_discounts`, as well as identifying potential fraudulent activity.
 
-
 The consumer function utilizes a subscription trigger on the `sale_events` topic to consume events from the topic. It then processes and persists these events to an Azure Storage Account and Cosmos DB. To ensure secure and controlled access to the necessary resources, a scoped managed identity with RBAC (Role-Based Access Control) permissions is employed. Additionally, the trigger connection is authenticated using a managed identity.
 
 By leveraging the capabilities of Bicep, all the required resources can be easily provisioned and managed with minimal effort. Bicep simplifies the process of defining and deploying Azure resources, allowing for efficient resource management.
@@ -56,7 +57,7 @@ By leveraging the capabilities of Bicep, all the required resources can be easil
 
 1. ## 🧰 Prerequisites
 
-   This demo, instructions, scripts and bicep template is designed to be run in `northeurope`. With few or no modifications you can try it out in other regions as well(_Not covered here_).
+   This demo, along with its instructions, scripts, and Bicep template, has been specifically designed to be executed in the `northeurope` region. However, with minimal modifications, you can also try running it in other regions of your choice (the specific steps for doing so are not covered in this context)
 
    - 🛠 Azure CLI Installed & Configured - [Get help here](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
    - 🛠 Azure Function Core Tools - [Get help here](https://learn.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=v4%2Cwindows%2Ccsharp%2Cportal%2Cbash#install-the-azure-functions-core-tools)
@@ -142,7 +143,9 @@ By leveraging the capabilities of Bicep, all the required resources can be easil
       }
       ```
 
-      This run of function has produced `10` messages with `4` of them were `sale_events` and `6` of them were `inventory_events`. _I have ran the producer function multiple times, so the numbers may vary for you_. You can also see the that `inventory_event` is stored in blob prefix of either `0` or `2` and `sale_event` is stored in blob prefix of either `1` or `3`. This is because we have configured the event hub to use `4` partitions and we have configured the event hub to use `2` partitions for each event type.
+      During the execution of this function, a total of 10 messages were produced, with 4 of them being classified as `sale_events` and 6 of them as `inventory_events`. Please note that the numbers may vary for your specific scenario if you run the producer function multiple times.
+
+      Additionally, when observing the storage of events in Blob Storage, you will notice that inventory_events are stored in blob prefixes either labeled as `0` or `2`, while `sale_events` are stored in blob prefixes labeled as either `1` or `3`. This configuration is a result of setting up the event hub to utilize 4 partitions, with 2 partitions allocated for each event type.
 
       ![Miztiik Automation - Event Streaming with Azure Event Hub](images/miztiik_architecture_event_streaming%20with_azure_event_hub_to_blob_002.png)
       ![Miztiik Automation - Event Streaming with Azure Event Hub](images/miztiik_architecture_event_streaming%20with_azure_event_hub_to_blob_003.png)
@@ -150,7 +153,7 @@ By leveraging the capabilities of Bicep, all the required resources can be easil
 
 1. ## 📒 Conclusion
 
-   In this demonstration, we have showcased how a event producer can stream events Azure Event Hub, capture and store the events in Blob Storage. This approach allows for efficient event processing and enables targeted handling based on specific criteria for downstream processing.
+   In this demonstration, we showcase a streamlined process for event streaming using Azure Event Hub. By leveraging this approach, event producers can efficiently capture and store events in Blob Storage. This allows for optimized event processing and enables targeted handling based on specific criteria, facilitating seamless downstream processing.
   
 1. ## 🧹 CleanUp
 
