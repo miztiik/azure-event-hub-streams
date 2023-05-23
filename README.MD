@@ -148,6 +148,7 @@ By leveraging the capabilities of Bicep, all the required resources can be easil
       Additionally, when observing the storage of events in Blob Storage, you will notice that inventory_events are stored in blob prefixes either labeled as `0` or `2`, while `sale_events` are stored in blob prefixes labeled as either `1` or `3`. This configuration is a result of setting up the event hub to utilize 4 partitions, with 2 partitions allocated for each event type.
 
       ![Miztiik Automation - Event Streaming with Azure Event Hub](images/miztiik_architecture_event_streaming%20with_azure_event_hub_to_blob_002.png)
+      ![Miztiik Automation - Event Streaming with Azure Event Hub](images/miztiik_architecture_event_streaming%20with_azure_event_hub_to_blob_005.png)
       ![Miztiik Automation - Event Streaming with Azure Event Hub](images/miztiik_architecture_event_streaming%20with_azure_event_hub_to_blob_003.png)
       ![Miztiik Automation - Event Streaming with Azure Event Hub](images/miztiik_architecture_event_streaming%20with_azure_event_hub_to_blob_004.png)
 
